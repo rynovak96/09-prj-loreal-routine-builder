@@ -42,6 +42,10 @@ function displayProducts(products) {
         <h3>${product.name}</h3>
         <p>${product.brand}</p>
       </div>
+      <!-- Overlay for description, shown on hover -->
+      <div class="product-description-overlay">
+        ${product.description}
+      </div>
     </div>
   `
     )
