@@ -18,12 +18,25 @@ async function loadProducts() {
   return data.products;
 }
 
+/* Store selected products */
+const selectedProducts = [];
+/* Reference to list area */
+const selectedProductsList = document.getElementById("selectedProductsList");
+
+/* Helper: update selected products display */
+function updateSelectedProductsList() {
+  // Create a small label for each selected product
+  selectedProductsList.innerHTML = selectedProducts
+    .map((p) => `<div class="selected-chip">${p.name}</div>`)
+    .join("");
+}
+
 /* Create HTML for displaying product cards */
 function displayProducts(products) {
   productsContainer.innerHTML = products
     .map(
       (product) => `
-    <div class="product-card">
+    <div class="product-card" data-name="${product.name}">
       <img src="${product.image}" alt="${product.name}">
       <div class="product-info">
         <h3>${product.name}</h3>
@@ -33,6 +46,29 @@ function displayProducts(products) {
   `
     )
     .join("");
+
+  /* Add click handlers to toggle selection */
+  const cards = productsContainer.querySelectorAll(".product-card");
+  cards.forEach((card) => {
+    const name = card.getAttribute("data-name");
+    /* If already selected (from previous category), mark it */
+    if (selectedProducts.some((p) => p.name === name)) {
+      card.classList.add("selected");
+    }
+    card.addEventListener("click", () => {
+      // Toggle select / deselect by checking if product already in array
+      const productObj = products.find((p) => p.name === name);
+      const idx = selectedProducts.findIndex((p) => p.name === name);
+      if (idx >= 0) {
+        selectedProducts.splice(idx, 1);
+        card.classList.remove("selected");
+      } else {
+        selectedProducts.push(productObj);
+        card.classList.add("selected");
+      }
+      updateSelectedProductsList();
+    });
+  });
 }
 
 /* Filter and display products when category changes */
