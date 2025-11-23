@@ -31,6 +31,39 @@ function updateSelectedProductsList() {
     .join("");
 }
 
+/* Helper: create and show a modal with product details */
+function showProductModal(product) {
+  // Create modal overlay
+  const modalOverlay = document.createElement("div");
+  modalOverlay.className = "modal-overlay";
+
+  // Create modal card
+  const modalCard = document.createElement("div");
+  modalCard.className = "modal-card";
+  modalCard.innerHTML = `
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <img src="${product.image}" alt="${product.name}" class="modal-img">
+    <div class="modal-info">
+      <h3>${product.name}</h3>
+      <p><strong>Brand:</strong> ${product.brand}</p>
+      <p><strong>Description:</strong> ${product.description}</p>
+    </div>
+  `;
+
+  // Add modal card to overlay
+  modalOverlay.appendChild(modalCard);
+  document.body.appendChild(modalOverlay);
+
+  // Close modal when clicking overlay or close button
+  function closeModal() {
+    document.body.removeChild(modalOverlay);
+  }
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) closeModal();
+  });
+  modalCard.querySelector(".modal-close").addEventListener("click", closeModal);
+}
+
 /* Create HTML for displaying product cards */
 function displayProducts(products) {
   productsContainer.innerHTML = products
@@ -42,26 +75,29 @@ function displayProducts(products) {
         <h3>${product.name}</h3>
         <p>${product.brand}</p>
       </div>
-      <!-- Overlay for description, shown on hover -->
-      <div class="product-description-overlay">
-        ${product.description}
-      </div>
     </div>
   `
     )
     .join("");
 
-  /* Add click handlers to toggle selection */
+  /* Add click handlers to toggle selection and show modal */
   const cards = productsContainer.querySelectorAll(".product-card");
   cards.forEach((card) => {
     const name = card.getAttribute("data-name");
-    /* If already selected (from previous category), mark it */
+    const productObj = products.find((p) => p.name === name);
+
+    // If already selected (from previous category), mark it
     if (selectedProducts.some((p) => p.name === name)) {
       card.classList.add("selected");
     }
-    card.addEventListener("click", () => {
-      // Toggle select / deselect by checking if product already in array
-      const productObj = products.find((p) => p.name === name);
+
+    // Show modal on click (left click only)
+    card.addEventListener("click", (e) => {
+      // If user clicks on card, show modal with description
+      showProductModal(productObj);
+
+      // Toggle select/deselect (hold Shift to select/deselect)
+      if (!e.shiftKey) return;
       const idx = selectedProducts.findIndex((p) => p.name === name);
       if (idx >= 0) {
         selectedProducts.splice(idx, 1);
